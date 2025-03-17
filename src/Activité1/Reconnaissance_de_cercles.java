@@ -1,4 +1,6 @@
 package Activité1;
+
+import org.opencv.features2d.DescriptorMatcher;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -19,6 +21,8 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfInt4;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
@@ -38,10 +42,11 @@ import org.opencv.imgproc.Imgproc;
 public class Reconnaissance_de_cercles {
 
 	public static void main(String[] args) {
+		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
+      
         // Charger l'image "circles.jpg"
-        Mat image = LectureImage("p7.jpg");
+        Mat image = LectureImage("p3.jpg");
 
         // Convertir l'image de l'espace colorimétrique BGR à HSV
         Mat hsvImage = Mat.zeros(image.size(), image.type());
@@ -74,12 +79,12 @@ public class Reconnaissance_de_cercles {
             Scalar color = new Scalar(rand.nextInt(255 - 0 + 1), rand.nextInt(255 - 0 + 1), rand.nextInt(255 - 0 + 1));
             Imgproc.drawContours(drawing, contours, i, color, 1, 8, hierarchy, 0, new Point());
         }
-
+        System.out.println("Nombre de contours détectés : " + contours.size());
         afficheImage("Contours", drawing);
-        
+
         
        //Reconnaître	les	formes	de	contours que ça soit cercle / triangle/rectangle 
-        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+       MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
         float[] radius = new float[1];
         Point center = new Point();
 
@@ -101,7 +106,7 @@ public class Reconnaissance_de_cercles {
                 Mat ball = Mat.zeros(tmp.size(), tmp.type());
                 tmp.copyTo(ball);
 
-                afficheImage("Ball", ball);
+                afficheImage("detection_forme", ball);
              // Enregistrer l'image de la balle dans un fichier
                 Highgui.imwrite("ball_detected.png", ball);
             } else {
@@ -147,16 +152,98 @@ public class Reconnaissance_de_cercles {
                 }
             }
         }
-
+        
         // Afficher l'image finale
-        afficheImage("Detection des formes", image);
+      afficheImage("Detection des formes", image);
         Mat savedBall = LectureImage("ball_detected.png");
-        afficheImage("Balle Enregistrée", savedBall);
-        Mat inputImage = LectureImage("ball_detected.png"); // Image d'entrée
-        Mat referenceImage = LectureImage("ref50.jpg"); // Image de référence (balle avec le nombre 3)
+       afficheImage("Balle Enregistrée", savedBall);
+        
+       Mat inputImage = LectureImage("ball_detected.png"); // Image d'entrée
+      Mat referenceImage = LectureImage("ref110.jpg"); // Image de référence 
+      //changement en niveau de gris
+      
+ /*     Mat object = LectureImage("ball_detected.png");
+      Mat sroadSign = Highgui.imread("ref30.jpg");      
+      Mat sObject = new Mat();
+      Imgproc.resize(object, sObject, sroadSign.size());
+      Mat grayObject = new Mat(sObject.rows(), sObject.cols(), sObject.type());
+      Imgproc.cvtColor(sObject, grayObject, Imgproc.COLOR_BGRA2GRAY);
+      Core.normalize(grayObject, grayObject, 0, 255, Core.NORM_MINMAX);
 
+      Mat graySign = new Mat(sroadSign.rows(), sroadSign.cols(), sroadSign.type());
+      Imgproc.cvtColor(sroadSign, graySign, Imgproc.COLOR_BGRA2GRAY);
+      Core.normalize(graySign, graySign, 0, 255, Core.NORM_MINMAX);
+      
+
+   // Extraction des descripteurs et keypoints  
+   FeatureDetector orbDetector = FeatureDetector.create(FeatureDetector.ORB);  
+   DescriptorExtractor orbExtractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+
+   MatOfKeyPoint objectKeypoints = new MatOfKeyPoint();  
+   orbDetector.detect(grayObject, objectKeypoints);
+
+   MatOfKeyPoint signKeypoints = new MatOfKeyPoint();  
+   orbDetector.detect(graySign, signKeypoints);
+
+   Mat objectDescriptor = new Mat(object.rows(), object.cols(), object.type());
+   orbExtractor.compute(grayObject, objectKeypoints, objectDescriptor);
+
+   Mat signDescriptor = new Mat(sroadSign.rows(), sroadSign.cols(), sroadSign.type());
+   orbExtractor.compute(graySign, signKeypoints, signDescriptor);
+// **Faire le matching**  
+   
+	
+	   
+
+	   
+
+	    // Faire le matching des descripteurs
+	    DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+	    MatOfDMatch matches = new MatOfDMatch();
+	    matcher.match(objectDescriptor, signDescriptor, matches);
+
+	    // Convertir les matches en liste pour filtrer
+	    List<DMatch> matchesList = matches.toList();
+	    List<DMatch> goodMatches = new ArrayList<>();
+
+	    // Filtrer les correspondances avec une distance inférieure à un seuil
+	    double maxDistance = 50.0; // Seuil à ajuster
+	    for (DMatch match : matchesList) {
+	        if (match.distance < maxDistance) {
+	            goodMatches.add(match);
+	        }
+	    }
+
+	    // Calculer un score de similarité
+	    double similarityScore =(double) goodMatches.size() / matchesList.size() * 100;
+	    System.out.println("Score de similarité : " + similarityScore + "%");
+
+	    // Déterminer si les images sont similaires
+	    double similarityThreshold = 60.0; // Seuil de similarité (à ajuster)
+	    if (similarityScore >= similarityThreshold) {
+	        System.out.println("Les images sont similaires.");
+	    } else {
+	        System.out.println("Les images ne sont pas similaires.");
+	    }
+
+	    // (Optionnel) Dessiner les correspondances
+	    Mat matchedImage = new Mat();
+	    Features2d.drawMatches(inputImage, objectKeypoints, referenceImage, signKeypoints,
+	            new MatOfDMatch(goodMatches.toArray(new DMatch[0])), matchedImage);
+
+	    // Afficher ou sauvegarder l'image résultante
+	    Highgui.imwrite("matches.jpg", matchedImage);
+	    afficheImage("Correspondances", matchedImage);
+	
+}
+   */
+  //      if (inputImage.empty() || referenceImage.empty()) {
+    //        System.err.println("Erreur : Une des images n'a pas pu être chargée.");
+      //      return;} /*
+      
+        
         // Redimensionner les images
-        Imgproc.resize(inputImage, inputImage, new Size(300, 300));
+       Imgproc.resize(inputImage, inputImage, new Size(300, 300));
         Imgproc.resize(referenceImage, referenceImage, new Size(300, 300));
 
         // Appliquer un flou gaussien
@@ -171,27 +258,46 @@ public class Reconnaissance_de_cercles {
         Mat grayReference = new Mat(referenceImage.rows(), referenceImage.cols(), referenceImage.type());
         Imgproc.cvtColor(referenceImage, grayReference, Imgproc.COLOR_BGRA2GRAY);
         Core.normalize(grayReference, grayReference, 0, 255, Core.NORM_MINMAX);
+        
+        
+		afficheImage("Image_gris_objet",grayInput);
+		afficheImage("Image_gris_reference",grayReference);
+        
+      
 
         // Détection des points clés et calcul des descripteurs
         FeatureDetector orbDetector = FeatureDetector.create(FeatureDetector.ORB);
         DescriptorExtractor orbExtractor = DescriptorExtractor.create(DescriptorExtractor.ORB);
 
         MatOfKeyPoint inputKeypoints = new MatOfKeyPoint();
+        Mat inputKeypointsImage = new Mat();
+        
+        
+        
         orbDetector.detect(grayInput, inputKeypoints);
+        Features2d.drawKeypoints(inputImage, inputKeypoints, inputKeypointsImage);
+        afficheImage("Points clés de l'image d'entrée", inputKeypointsImage);
 
         MatOfKeyPoint referenceKeypoints = new MatOfKeyPoint();
         orbDetector.detect(grayReference, referenceKeypoints);
+        Mat referenceKeypointsImage = new Mat();
+        Features2d.drawKeypoints(referenceImage, referenceKeypoints, referenceKeypointsImage);
+        afficheImage("Points clés de l'image de référence", referenceKeypointsImage);
 
-        Mat inputDescriptor = new Mat(inputImage.rows(), inputImage.cols(), inputImage.type());
+        Mat inputDescriptor = new Mat();
         orbExtractor.compute(grayInput, inputKeypoints, inputDescriptor);
 
-        Mat referenceDescriptor = new Mat(referenceImage.rows(), referenceImage.cols(), referenceImage.type());
+        Mat referenceDescriptor = new Mat();
         orbExtractor.compute(grayReference, referenceKeypoints, referenceDescriptor);
+        System.out.println("Taille du descripteur de l'image d'entrée : " + inputDescriptor.size());
+        System.out.println("Taille du descripteur de l'image de référence : " + referenceDescriptor.size());
 
         // Correspondance des descripteurs
         MatOfDMatch matches = new MatOfDMatch();
-        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE);
+        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
         matcher.match(inputDescriptor, referenceDescriptor, matches);
+        System.out.println("Matrice"+matches.dump());
+        System.out.println("taille_Matrice"+matches.size());
 
         // Afficher les distances des correspondances
         for (DMatch match : matches.toArray()) {
@@ -203,18 +309,19 @@ public class Reconnaissance_de_cercles {
         System.out.println("Score de correspondance : " + matchScore);
 
         // Si la correspondance est bonne, retourner le nombre de l'image de référence
-        if (matchScore > 0.1) { // Seuil ajusté
-            System.out.println("Correspondance détectée ! Le nombre dans l'image de référence est : 3");
+        if (matchScore > 50) { // Seuil ajusté
+            System.out.println("Correspondance détectée ! Le nombre dans l'image de référence est : 110");
         } else {
             System.out.println("Aucune correspondance détectée.");
         }
 
         // Afficher les correspondances (optionnel)
-        Mat matchedImage = new Mat(inputImage.rows(), inputImage.cols() * 2, inputImage.type());
+        Mat matchedImage = new Mat();
         Features2d.drawMatches(inputImage, inputKeypoints, referenceImage, referenceKeypoints, matches, matchedImage);
         afficheImage("Correspondances", matchedImage);
-    
 	}
+	
+ 
 	public static Mat LectureImage(String fichier) {
         File file = new File(fichier);
         Mat img = Highgui.imread(file.getAbsolutePath());
@@ -256,12 +363,30 @@ public class Reconnaissance_de_cercles {
 		return Math.floor(alpha * 180. / Math.PI + 0.5);
 	}
 	   // Méthode pour calculer un score de correspondance
-    public static double calculateMatchScore(MatOfDMatch matches) {
-        double totalDistance = 0;
-        for (DMatch match : matches.toArray()) {
-            totalDistance += match.distance;
-        }
-        return 1.0 / (1.0 + totalDistance / matches.rows()); // Score entre 0 et 1
-    }
+	  public static double calculateMatchScore(MatOfDMatch matches) {
+	        double totalDistance = 0;
+	        int taille = (int) matches.total();
 
+	        
+	        for (DMatch match : matches.toArray()) {
+	            totalDistance += match.distance;
+	        }
+	        System.out.println(totalDistance);
+	        System.out.println(matches.rows());
+	        if(totalDistance>9000 ) {
+	        	return ( totalDistance /  150);
+	        }
+	        else 
+	     
+	    //   return ( totalDistance / matches.rows() ); // Score entre 0 et 1
+	        return ( totalDistance /  100);
+	    }
+
+	    public static double compareHistograms(Mat img1, Mat img2) {
+	        Mat hist1 = new Mat();
+	        Mat hist2 = new Mat();
+	        Imgproc.calcHist(Arrays.asList(img1), new MatOfInt(0), new Mat(), hist1, new MatOfInt(256), new MatOfFloat(0, 256));
+	        Imgproc.calcHist(Arrays.asList(img2), new MatOfInt(0), new Mat(), hist2, new MatOfInt(256), new MatOfFloat(0, 256));
+	        return Imgproc.compareHist(hist1, hist2, Imgproc.CV_COMP_CORREL);
+	    }
 }

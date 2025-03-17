@@ -25,19 +25,35 @@ public class Imageref {
 				Mat saturee1=MaBibliothequeTraitementImage.seuillage_exemple(transformee, 6);
 		MaBibliothequeTraitementImageEtendue.afficheImage("Seuillageee 1 ", saturee1);
 			MaBibliothequeTraitementImageEtendue.afficheImage("Seuillage", saturee);
+		
 			Mat objetrond = null;
 
 			//Cr�ation d'une liste des contours � partir de l'image satur�e
 			List<MatOfPoint> ListeContours= MaBibliothequeTraitementImageEtendue.ExtractContours(saturee);
+			System.out.println("Nombre de contours détectés : " + ListeContours.size());
 			int i=0;
 			double [] scores=new double [7];
 			//Pour tous les contours de la liste
+			if (ListeContours.isEmpty()) {
+			    System.out.println("Aucun contour détecté !");
+			    return null;
+			}
 			for (MatOfPoint contour: ListeContours  ){
 				i++;
 				objetrond=MaBibliothequeTraitementImageEtendue.DetectForm(m,contour);
+				if (objetrond == null) {
+				    System.out.println("Le contour " + i + " n'a pas été reconnu comme un cercle.");
+				    continue;
+				}
+				if (objetrond.empty()) {
+				    System.out.println("Objet rond détecté mais l'image est vide !");
+				    continue;
+				}
+
+				MaBibliothequeTraitementImageEtendue.afficheImage("Image_rond", objetrond);
 			    
 				if (objetrond!=null){
-					//MaBibliothequeTraitementImage.afficheImage("Objet rond det�ct�", objetrond);
+					MaBibliothequeTraitementImage.afficheImage("Objet rond det�ct�", objetrond);
 					scores[0]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"ref30.jpg");
 					scores[1]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"ref50.jpg");
 					scores[2]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"ref70.jpg");

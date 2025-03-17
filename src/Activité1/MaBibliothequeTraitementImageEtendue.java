@@ -127,64 +127,83 @@ public class MaBibliothequeTraitementImageEtendue {
 	
 	}
 
-	public static Mat DetectForm(Mat img,MatOfPoint contour) {
-		
-		
+	public static Mat DetectForm(Mat img, MatOfPoint contour) {
 		MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 		MatOfPoint2f approxCurve = new MatOfPoint2f();
 		float[] radius = new float[1];
 		Point center = new Point();
-		//System.out.println(contour);
 		Rect rect = Imgproc.boundingRect(contour);
 		double contourArea = Imgproc.contourArea(contour);
-		int contourSize = (int)contour.total();
+
 		matOfPoint2f.fromList(contour.toList());
 		// Cherche le plus petit cercle entourant le contour
 		Imgproc.minEnclosingCircle(matOfPoint2f, center, radius);
-		//System.out.println(contourArea+" "+Math.PI*radius[0]*radius[0]);
-		//on dit que c'est un cercle si l'aire occupé par le contour est à supérieure à  80% de l'aire occupée par un cercle parfait
-		if ((contourArea / (Math.PI*radius[0]*radius[0])) >=0.8 ) {
-			//System.out.println("Cercle");
-			Core.circle(img, center, (int)radius[0], new Scalar(255, 0, 0), 2);
-			Core.rectangle(img, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar (0, 255, 0), 2);
-			Mat tmp = img.submat(rect.y,rect.y+rect.height,rect.x,rect.x+rect.width);
-			Mat sign = Mat.zeros(tmp.size(),tmp.type());
+		// System.out.println(contourArea+" "+Math.PI*radius[0]*radius[0]);
+		// on dit que c'est un cercle si l'aire occup� par le contour est � sup�rieure �
+		// 80% de l'aire occup�e par un cercle parfait
+		if ((contourArea / (Math.PI * radius[0] * radius[0])) >= 0.8) {
+			// System.out.println("Cercle");
+			Core.circle(img, center, (int) radius[0], new Scalar(255, 0, 0), 2);
+			Core.rectangle(img, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height),
+					new Scalar(0, 255, 0), 2);
+			Mat tmp = img.submat(rect.y, rect.y + rect.height, rect.x, rect.x + rect.width);
+			Mat sign = Mat.zeros(tmp.size(), tmp.type());
 			tmp.copyTo(sign);
-			if (contourSize>20 && contourSize<85) {
 			return sign;
-			}
-		
-		}else {
+		} else {
 
 			Imgproc.approxPolyDP(matOfPoint2f, approxCurve, Imgproc.arcLength(matOfPoint2f, true) * 0.02, true);
 			long total = approxCurve.total();
-			if (total == 3  && contourSize>10 ) { // is triangle
-				//System.out.println("Triangle");
-				Point [] pt = approxCurve.toArray();
-				Core.line(img, pt[2], pt[0], new Scalar(255,0,0),2);
-				Core.rectangle(img, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar (0, 255, 0), 3);
-				Mat tmp = img.submat(rect.y,rect.y+rect.height,rect.x,rect.x+rect.width);
-				Mat sign = Mat.zeros(tmp.size(),tmp.type());
+			if (total == 3) { // is triangle
+				// System.out.println("Triangle");
+				Point[] pt = approxCurve.toArray();
+				Core.line(img, pt[0], pt[1], new Scalar(255, 0, 0), 2);
+				Core.line(img, pt[1], pt[2], new Scalar(255, 0, 0), 2);
+				Core.line(img, pt[2], pt[0], new Scalar(255, 0, 0), 2);
+				Core.rectangle(img, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height),
+						new Scalar(0, 255, 0), 2);
+				Mat tmp = img.submat(rect.y, rect.y + rect.height, rect.x, rect.x + rect.width);
+				Mat sign = Mat.zeros(tmp.size(), tmp.type());
 				tmp.copyTo(sign);
 				return null;
 			}
-			if (total >= 4 && total <= 6 && contourSize>60) {
-				//System.out.println("rectangle**");
+			if (total >= 4 && total <= 6) {
 				List<Double> cos = new ArrayList<>();
 				Point[] points = approxCurve.toArray();
-		        if (total==4 ) {
-		        	Core.rectangle(img, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar (0, 255, 0), 2);
-					Mat tmp = img.submat(rect.y,rect.y+rect.height,rect.x,rect.x+rect.width);
-					Mat sign = Mat.zeros(tmp.size(),tmp.type());
+				for (int j = 2; j < total + 1; j++) {
+					cos.add(angle(points[(int) (j % total)], points[j - 2], points[j - 1]));
+				}
+				Collections.sort(cos);
+				Double minCos = cos.get(0);
+				Double maxCos = cos.get(cos.size() - 1);
+				boolean isRect = total == 4 && minCos >= -0.1 && maxCos <= 0.3;
+				boolean isPolygon = (total == 5 && minCos >= -0.34 && maxCos <= -0.27)
+						|| (total == 6 && minCos >= -0.55 && maxCos <= -0.45);
+				if (isRect) {
+					double ratio = Math.abs(1 - (double) rect.width / rect.height);
+					// drawText(rect.tl(), ratio <= 0.02 ? "SQU" : "RECT");
+					// System.out.println("Rectangle");
+					Core.rectangle(img, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height),
+							new Scalar(0, 255, 0), 2);
+					Mat tmp = img.submat(rect.y, rect.y + rect.height, rect.x, rect.x + rect.width);
+					Mat sign = Mat.zeros(tmp.size(), tmp.type());
 					tmp.copyTo(sign);
 					return null;
-		        	
-		        }
+				}
 				
-			}			
+			}
 		}
 		return null;
 
+	}
+
+	public static double angle(Point a, Point b, Point c) {
+		Point ab = new Point(b.x - a.x, b.y - a.y);
+		Point cb = new Point(b.x - c.x, b.y - c.y);
+		double dot = (ab.x * cb.x + ab.y * cb.y); // dot product
+		double cross = (ab.x * cb.y - ab.y * cb.x); // cross product
+		double alpha = Math.atan2(cross, dot);
+		return Math.floor(alpha * 180. / Math.PI + 0.5);
 	}
 public static Mat DetectFormim(Mat img,MatOfPoint contour) {
 		
@@ -242,6 +261,8 @@ public static Mat DetectFormim(Mat img,MatOfPoint contour) {
 				
 			}			
 		}
+		System.out.println("Aucune forme détectée pour ce contour.");
+
 		return null;
 
 	}
