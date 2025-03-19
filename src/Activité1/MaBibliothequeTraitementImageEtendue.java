@@ -46,7 +46,7 @@ import org.opencv.features2d.Features2d;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
-
+import utilitaireAgreg.MaBibliothequeTraitementImage;
 
 public class MaBibliothequeTraitementImageEtendue {
 	
@@ -125,6 +125,27 @@ public class MaBibliothequeTraitementImageEtendue {
 
 		return contours;
 	
+	}	public static Mat seuillage(Mat input, int seuilRougeOrange, int seuilRougeViolet, int seuilSaturation) {
+		Vector<Mat> channels = splitHSVChannels(input);
+		Scalar rougeviolet = new Scalar(seuilRougeViolet);
+		Scalar rougeorange = new Scalar(seuilRougeOrange);
+		Scalar seuilsaturation = new Scalar(seuilSaturation);
+
+		Mat rouges_orange = new Mat();
+		Mat rouges_violet = new Mat();
+		Mat rouges_sat = new Mat();
+		Mat Image_sortierouge = new Mat();
+		Mat Image_sortie = new Mat();
+
+		Core.compare(channels.get(0), rougeviolet, rouges_violet, Core.CMP_GT);
+		Core.compare(channels.get(0), rougeorange, rouges_orange, Core.CMP_LT);
+		Core.compare(channels.get(1), seuilsaturation, rouges_sat, Core.CMP_GT);
+
+		Core.bitwise_or(rouges_violet, rouges_orange, Image_sortierouge);
+		Core.bitwise_and(Image_sortierouge, rouges_sat, Image_sortie);
+
+		return Image_sortierouge;
+
 	}
 
 	public static Mat DetectForm(Mat img, MatOfPoint contour) {
@@ -149,6 +170,7 @@ public class MaBibliothequeTraitementImageEtendue {
 			Mat tmp = img.submat(rect.y, rect.y + rect.height, rect.x, rect.x + rect.width);
 			Mat sign = Mat.zeros(tmp.size(), tmp.type());
 			tmp.copyTo(sign);
+			afficheImage("detection_forme", sign);
 			return sign;
 		} else {
 
@@ -353,4 +375,35 @@ public static Mat DetectFormim(Mat img,MatOfPoint contour) {
 				    //System.out.println(better_matches_mat.size(),better_matches_mat.pt.x);
 					return better_matches_mat.size().height;
 						
-		}}
+		}
+	
+	public static void main(String[] args) {
+        try {
+        	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+			//System.loadLibrary("opencv_java249");
+			Mat m=Highgui.imread("p0.jpg",Highgui.CV_LOAD_IMAGE_COLOR);
+			MaBibliothequeTraitementImageEtendue.afficheImage("Image testee", m);
+			Mat transformee=MaBibliothequeTraitementImageEtendue.transformeBGRversHSV(m);
+			MaBibliothequeTraitementImageEtendue.afficheImage("ImageHSV", transformee); 
+			//la methode seuillage est ici extraite de l'archivage jar du meme nom 
+			Mat saturee=MaBibliothequeTraitementImage.seuillage(transformee, 6, 170, 110);
+			MaBibliothequeTraitementImageEtendue.afficheImage("Imagesaturee", saturee);
+				Mat saturee1=TraitementImage.seuillage_exemple(transformee, 6);
+	//	MaBibliothequeTraitementImageEtendue.afficheImage("Seuillageee 1 ", saturee1);
+			MaBibliothequeTraitementImageEtendue.afficheImage("Seuillage", saturee);
+			List<MatOfPoint> ListeContours= MaBibliothequeTraitementImageEtendue.ExtractContours(saturee);
+			Mat objetrond = null;
+
+			for(MatOfPoint contour :ListeContours) {
+				objetrond=MaBibliothequeTraitementImageEtendue.DetectForm(m,contour);
+				
+			}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+}

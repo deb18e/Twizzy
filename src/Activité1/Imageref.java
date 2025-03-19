@@ -1,5 +1,5 @@
 package Activité1;
-
+import utilitaireAgreg.MaBibliothequeTraitementImage;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -15,15 +15,15 @@ public class Imageref {
 	//Ouverture le l'image et saturation des rouges
 			System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 			//System.loadLibrary("opencv_java249");
-			Mat m=Highgui.imread("p10.jpg",Highgui.CV_LOAD_IMAGE_COLOR);
+			Mat m=Highgui.imread(args,Highgui.CV_LOAD_IMAGE_COLOR);
 			MaBibliothequeTraitementImageEtendue.afficheImage("Image testee", m);
 			Mat transformee=MaBibliothequeTraitementImageEtendue.transformeBGRversHSV(m);
 			MaBibliothequeTraitementImageEtendue.afficheImage("ImageHSV", transformee); 
 			//la methode seuillage est ici extraite de l'archivage jar du meme nom 
-			Mat saturee=MaBibliothequeTraitementImage.seuillage(transformee, 6, 170, 110);
+			Mat saturee=MaBibliothequeTraitementImageEtendue.seuillage(transformee, 6, 170, 110);
 			MaBibliothequeTraitementImageEtendue.afficheImage("Imagesaturee", saturee);
-				Mat saturee1=MaBibliothequeTraitementImage.seuillage_exemple(transformee, 6);
-		MaBibliothequeTraitementImageEtendue.afficheImage("Seuillageee 1 ", saturee1);
+				Mat saturee1=TraitementImage.seuillage_exemple(transformee, 6);
+	//	MaBibliothequeTraitementImageEtendue.afficheImage("Seuillageee 1 ", saturee1);
 			MaBibliothequeTraitementImageEtendue.afficheImage("Seuillage", saturee);
 		
 			Mat objetrond = null;
@@ -40,7 +40,8 @@ public class Imageref {
 			}
 			for (MatOfPoint contour: ListeContours  ){
 				i++;
-				objetrond=MaBibliothequeTraitementImageEtendue.DetectForm(m,contour);
+				objetrond=MaBibliothequeTraitementImageEtendue.DetectFormim(m,contour);
+				System.out.println("le nb de contour est "+ListeContours.size());
 				if (objetrond == null) {
 				    System.out.println("Le contour " + i + " n'a pas été reconnu comme un cercle.");
 				    continue;
@@ -59,7 +60,7 @@ public class Imageref {
 					scores[2]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"ref70.jpg");
 					scores[3]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"ref90.jpg");
 					scores[4]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"ref110.jpg");
-					scores[5]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"refdouble.jpg");
+			//		scores[5]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"refdouble.jpg");
 					//scores[6]=MaBibliothequeTraitementImageEtendue.Similitude(objetrond,"train1.jpg");
 
 					//recherche de l'index du maximum et affichage du panneau detect�
@@ -100,7 +101,7 @@ public class Imageref {
 		}
 	public static void main(String[] args) {
         try {
-            String result = processImage("chemin/vers/votre/image.jpg");
+            String result = processImage("70.jpg");
             System.out.println("Résultat : " + result);
         } catch (Exception e) {
             e.printStackTrace();

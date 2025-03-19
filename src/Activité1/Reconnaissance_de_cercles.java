@@ -46,7 +46,7 @@ public class Reconnaissance_de_cercles {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
       
         // Charger l'image "circles.jpg"
-        Mat image = LectureImage("p3.jpg");
+        Mat image = LectureImage("70.jpg");
 
         // Convertir l'image de l'espace colorimétrique BGR à HSV
         Mat hsvImage = Mat.zeros(image.size(), image.type());

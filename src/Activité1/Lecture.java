@@ -26,7 +26,7 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
-
+import utilitaireAgreg.MaBibliothequeTraitementImage;
 
 public class Lecture {
 	static {
