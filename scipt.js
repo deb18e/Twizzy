@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // URL de votre API sur Render - À REMPLACER PAR VOTRE URL RÉELLE
-    const API_URL = 'https://votre-api-render-url.onrender.com/predict';
+    const API_URL = 'https://cnn-1-78qu.onrender.com/predict';
 
     // 1. Gestion du bouton "Parcourir" (pour fichiers PNG uniquement)
     uploadBtn.addEventListener('click', function(e) {
