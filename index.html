@@ -14,10 +14,11 @@
       <div class="upload-area" id="uploadArea">
         <input type="file" id="imageInput" accept="image/*" hidden />
         <div class="drop-zone" id="dropZone">
-          <span>Glissez-déposez une image ici ou</span>
-          <button id="uploadBtn">Parcourir</button>
-          <p>Formats supportés: JPG, PNG, JPEG</p>
+            <span>Glissez-déposez une image PNG ici ou</span>
+            <button id="uploadBtn">Parcourir</button>
+            <p>Format supporté: PNG uniquement</p>
         </div>
+        <input type="file" id="imageInput" accept=".png,image/png" hidden>
       </div>
 
       <div class="result-area" id="resultArea" style="display: none">

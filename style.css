@@ -45,7 +45,11 @@ h1 {
     background-color: #e1f0fa;
     border-color: #1abc9c;
 }
-
+.drop-zone p {
+    color: #7f8c8d;
+    font-size: 12px;
+    margin-top: 8px;
+}
 #uploadBtn {
     background-color: #3498db;
     color: white;
@@ -86,6 +90,12 @@ h1 {
     padding: 15px;
     border-radius: 5px;
     margin-bottom: 15px;
+}
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 10px;
+    display: none;
 }
 
 #tryAgainBtn {
