@@ -1,14 +1,16 @@
 torch==2.5.1
-torchvision==0.13.0
-pillow>=8.4.0  # Updated to a version compatible with torchvision 0.13.0
+torchvision==0.17.1  # Version compatible avec torch 2.5.1
+pillow>=9.0.0
 pandas==2.0.3
 numpy==1.24.3
 matplotlib==3.7.1
-flask==2.0.1
+flask>=2.0.0
+flask-cors>=3.0.10
 werkzeug==2.0.3
 click==8.1.8
 itsdangerous==2.2.0
 jinja2==3.1.6
 typing-extensions==4.13.0
-waitress==2.1.2
 
+
+waitress>=2.0.0
