@@ -1,74 +1,54 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Classification de Panneaux Routiers</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1>Classification de Panneaux Routiers</h1>
-      <p>Téléchargez une image de panneau pour identifier son type</p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Classification de Panneaux Routiers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Classification de Panneaux Routiers</h1>
+    <p>Téléchargez une image de panneau pour identifier son type</p>
 
-      <div class="upload-area" id="uploadArea">
-        <input type="file" id="imageInput" accept="image/*" hidden />
-        <div class="drop-zone" id="dropZone">
+    <div class="drop-zone" id="dropZone">
+        <label for="imageInput" style="cursor: pointer;">
             <span>Glissez-déposez une image PNG ici ou</span>
             <button id="uploadBtn">Parcourir</button>
-            <p>Format supporté: PNG uniquement</p>
-        </div>
-        <input type="file" id="imageInput" accept=".png,image/png" hidden>
-      </div>
-
-      <div class="result-area" id="resultArea" style="display: none">
-        <h2>Résultat</h2>
-        <div class="image-preview">
-          <img id="previewImage" src="" alt="Prévisualisation" />
-        </div>
-        <div class="prediction-result">
-          <p>
-            <strong>Type de panneau:</strong>
-            <span id="predictionClass">-</span>
-          </p>
-          <p>
-            <strong>Limitation de vitesse:</strong>
-            <span id="predictionSpeed">-</span>
-          </p>
-        </div>
-        <button id="tryAgainBtn">Essayer une autre image</button>
-      </div>
-
-      <div class="loading" id="loading" style="display: none">
-        <div class="spinner"></div>
-        <p>Analyse en cours...</p>
-      </div>
-
-      <div class="examples">
-        <h3>Exemples à tester</h3>
-        <div class="example-images">
-          <img
-            src="assets/example1.jpg"
-            alt="Exemple 30km/h"
-            class="example-img"
-            data-speed="30 km/h"
-          />
-          <img
-            src="assets/example2.jpg"
-            alt="Exemple Stop"
-            class="example-img"
-            data-speed="Stop"
-          />
-          <img
-            src="assets/example3.jpg"
-            alt="Exemple 50km/h"
-            class="example-img"
-            data-speed="50 km/h"
-          />
-        </div>
-      </div>
+        </label>
+        <input type="file" id="imageInput" accept="image/png" hidden>
+        <p>Format supporté: PNG uniquement</p>
+    </div>
+      <p id="errorMsg" style="color: red; display: none;"></p>
     </div>
 
-    <script src="script.js"></script>
-  </body>
+    <div class="result-area" id="resultArea" style="display: none;">
+      <h2>Résultat</h2>
+      <div class="image-preview">
+        <img id="previewImage" src="" alt="Prévisualisation">
+      </div>
+      <div class="prediction-result">
+        <p><strong>Type de panneau:</strong> <span id="predictionClass">-</span></p>
+        <p><strong>Limitation de vitesse:</strong> <span id="predictionSpeed">-</span></p>
+      </div>
+      <button id="tryAgainBtn">Essayer une autre image</button>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+      <div class="spinner"></div>
+      <p>Analyse en cours...</p>
+    </div>
+
+    <div class="examples">
+      <h3>Exemples à tester</h3>
+      <div class="example-images">
+        <img src="assets/example1.png" alt="Exemple 30km/h" class="example-img">
+        <img src="assets/example2.png" alt="Exemple Stop" class="example-img">
+        <img src="assets/example3.png" alt="Exemple 50km/h" class="example-img">
+      </div>
+    </div>
+  </div>
+
+  <script src="scipt.js"></script>
+</body>
 </html>

@@ -51,6 +51,7 @@ h1 {
     margin-top: 8px;
 }
 #uploadBtn {
+    cursor: pointer;
     background-color: #3498db;
     color: white;
     border: none;
@@ -61,7 +62,10 @@ h1 {
     margin: 10px 0;
     transition: background-color 0.3s;
 }
-
+.drop-zone label {
+    display: block;
+    cursor: pointer;
+}
 #uploadBtn:hover {
     background-color: #2980b9;
 }
