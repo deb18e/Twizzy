@@ -1,4 +1,4 @@
-torch==1.12.0
+torch==2.5.1
 torchvision==0.13.0
 pillow>=8.4.0  # Updated to a version compatible with torchvision 0.13.0
 pandas==2.0.3
