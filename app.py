@@ -7,6 +7,7 @@ from waitress import serve
 
 app = Flask(__name__)
 
+
 # Charger le modèle
 MODEL_PATH = './model_resnet4_classes.pth'
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -68,6 +69,10 @@ def predict():
         'class': predicted_class.item(),
         'speed': predicted_speed
     })
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # Cela permettra les requêtes depuis votre interface web
 
 if __name__ == '__main__':
     # Use this for development
