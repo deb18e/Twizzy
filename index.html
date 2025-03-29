@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Classification de Panneaux Routiers</title>
   <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
   <div class="container">
@@ -13,14 +14,13 @@
 
     <div class="drop-zone" id="dropZone">
         <label for="imageInput" style="cursor: pointer;">
-            <span>Glissez-déposez une image PNG ici ou</span>
+            <span>Glissez-déposez une image ici ou</span>
             <button id="uploadBtn">Parcourir</button>
         </label>
-        <input type="file" id="imageInput" accept="image/png" hidden>
-        <p>Format supporté: PNG uniquement</p>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+        <p>Formats supportés: JPG, JPEG, PNG (seront convertis en PNG)</p>
     </div>
-      <p id="errorMsg" style="color: red; display: none;"></p>
-    </div>
+    <p id="errorMsg" style="color: red; display: none;"></p>
 
     <div class="result-area" id="resultArea" style="display: none;">
       <h2>Résultat</h2>
@@ -48,7 +48,7 @@
       </div>
     </div>
   </div>
-
   <script src="scipt.js"></script>
+
 </body>
 </html>

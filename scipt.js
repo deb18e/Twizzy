@@ -12,22 +12,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const errorMsg = document.getElementById('errorMsg');
     const exampleImages = document.querySelectorAll('.example-img');
 
-    // Utilisation d'un proxy CORS pour contourner le problème CORS en développement
-    
-
-
+    // Modifier l'input pour accepter tous les formats d'image
+    imageInput.setAttribute('accept', 'image/*');
 
     // Quand on clique sur le bouton "Parcourir"
     uploadBtn.addEventListener("click", function (e) {
-        e.preventDefault(); // Empêche le comportement par défaut
-        e.stopPropagation(); // Empêche la propagation
-        imageInput.click(); // Déclenche le clic sur l'input
+        e.preventDefault();
+        e.stopPropagation();
+        imageInput.click();
     });
 
     // Quand un fichier est sélectionné
     imageInput.addEventListener('change', function (e) {
         if (e.target.files && e.target.files[0]) {
-            handleFileSelect(e.target.files);
+            handleFileSelect(e.target.files[0]);
         }
     });
 
@@ -42,35 +40,61 @@ document.addEventListener('DOMContentLoaded', function () {
     dropZone.addEventListener("drop", (event) => {
         event.preventDefault();
         dropZone.classList.remove("highlight");
-        handleFileSelect(event.dataTransfer.files);
+        if (event.dataTransfer.files.length) {
+            handleFileSelect(event.dataTransfer.files[0]);
+        }
     });
 
-    // Fonction pour gérer la sélection de fichiers
-    function handleFileSelect(files) {
-        const file = files[0];
-        if (!file) return;
-
-        // Vérification du type PNG
-        if (!file.type.match('image/png')) {
-            return showError('Seuls les fichiers PNG sont acceptés');
-        }
-
+    // Fonction pour convertir une image en PNG
+    function convertToPNG(file, callback) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            previewImage.src = e.target.result;
-            dropZone.style.display = 'none';
-            loading.style.display = 'block';
-            sendImageToAPI(file);
-        };
-        reader.onerror = function () {
-            showError('Erreur de lecture du fichier');
+            const img = new Image();
+            img.onload = function () {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                
+                canvas.toBlob(function (blob) {
+                    const pngFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", {
+                        type: "image/png"
+                    });
+                    callback(pngFile);
+                }, 'image/png');
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    // Fonction pour envoyer l'image à l'API
-   
+    // Fonction pour gérer la sélection de fichiers
+    function handleFileSelect(file) {
+        if (!file) return;
 
+        // Vérification que c'est bien une image
+        if (!file.type.match('image.*')) {
+            return showError('Seuls les fichiers image sont acceptés');
+        }
+
+        // Conversion en PNG
+        convertToPNG(file, function(pngFile) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                dropZone.style.display = 'none';
+                loading.style.display = 'block';
+                sendImageToAPI(pngFile);
+            };
+            reader.onerror = function () {
+                showError('Erreur de lecture du fichier');
+            };
+            reader.readAsDataURL(pngFile);
+        });
+    }
+
+    // Fonction pour envoyer l'image à l'API
     const API_URL = 'http://localhost:5000/predict'; // Changez cette URL en production
 
     async function sendImageToAPI(file) {
@@ -105,6 +129,22 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             showError(`Erreur lors de la prédiction: ${error.message}`);
             console.error('Erreur API:', error);
+            
+            // Essayer avec le proxy CORS en cas d'échec
+            if (error.name === 'TypeError' && API_URL !== 'http://localhost:5000/predict') {
+                console.log('Tentative avec proxy CORS...');
+                tryWithProxy(formData)
+                    .then(data => {
+                        predictionClass.textContent = data.data.class || '0';
+                        predictionSpeed.textContent = data.data.speed || 'Non spécifié';
+                        loading.style.display = 'none';
+                        resultArea.style.display = 'block';
+                    })
+                    .catch(proxyError => {
+                        showError(`Échec avec proxy: ${proxyError.message}`);
+                    });
+            }
+            
             throw error;
         }
     }
@@ -114,7 +154,10 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch(PROXY_URL + API_URL, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
             });
             return await response.json();
         } catch (proxyError) {
@@ -129,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleLoading(false);
     }
 
-    // Fonction pour gérer l'état de chargement et l'affichage du résultat
+    // Fonction pour gérer l'état de chargement
     function toggleLoading(isLoading, showResult = false) {
         loading.style.display = isLoading ? 'block' : 'none';
         dropZone.style.display = isLoading ? 'none' : 'block';
@@ -156,7 +199,10 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleLoading(true);
             fetch(this.src)
                 .then(res => res.blob())
-                .then(blob => handleFileSelect([new File([blob], "example.png", { type: 'image/png' })]))
+                .then(blob => {
+                    const file = new File([blob], "example.png", { type: 'image/png' });
+                    handleFileSelect(file);
+                })
                 .catch(() => showError('Impossible de charger l\'image exemple'));
         });
     });
