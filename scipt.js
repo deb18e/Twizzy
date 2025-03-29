@@ -29,16 +29,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   
     // Drag & Drop
-    uploadArea.addEventListener("dragover", (event) => {
+    dropZone.addEventListener("dragover", (event) => {
       event.preventDefault();
-      uploadArea.classList.add("highlight");
+      dropZone.classList.add("highlight");
     });
   
-    uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("highlight"));
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("highlight"));
   
-    uploadArea.addEventListener("drop", (event) => {
+    dropZone.addEventListener("drop", (event) => {
       event.preventDefault();
-      uploadArea.classList.remove("highlight");
+      dropZone.classList.remove("highlight");
       handleFileSelect(event.dataTransfer.files);
     });
   
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const reader = new FileReader();
         reader.onload = function(e) {
             previewImage.src = e.target.result;
-            uploadArea.style.display = 'none';
+            dropZone.style.display = 'none';
             loading.style.display = 'block';
             sendImageToAPI(file);
         };
@@ -65,19 +65,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     }
   
-    function sendImageToAPI(file) {
-      const formData = new FormData();
-      formData.append('image', file);
-  
-      fetch(API_URL, { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => {
-          if (!data || !data.class || !data.speed) throw new Error('Réponse API invalide');
-          predictionClass.textContent = data.class;
-          predictionSpeed.textContent = data.speed;
-          toggleLoading(false, true);
-        })
-        .catch(error => showError(`Erreur API: ${error.message}`));
+    
+
+    async function sendImageToAPI(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+    
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                },
+                mode: 'cors'
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erreur API:', error);
+            throw error;
+        }
     }
   
     function showError(message) {
@@ -88,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
     function toggleLoading(isLoading, showResult = false) {
       loading.style.display = isLoading ? 'block' : 'none';
-      uploadArea.style.display = isLoading ? 'none' : 'block';
+      dropZone.style.display = isLoading ? 'none' : 'block';
       resultArea.style.display = showResult ? 'block' : 'none';
     }
   

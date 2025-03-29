@@ -6,10 +6,17 @@ from flask import Flask, jsonify, request
 from waitress import serve
 from flask_cors import CORS
 import warnings
+from flask_cors import CORS
 
 # Initialisation de l'application Flask
 app = Flask(__name__)
-CORS(app)  # Activation CORS - Doit être placé juste après la création de l'app
+CORS(app, resources={
+    r"/predict": {
+        "origins": "*",  # Autorise toutes les origines
+        "methods": ["POST", "OPTIONS"],  # Autorise les requêtes POST et OPTIONS
+        "allow_headers": ["Content-Type"]
+    }
+})  # Activation CORS - Doit être placé juste après la création de l'app
 
 # Suppression des avertissements indésirables
 warnings.filterwarnings("ignore", category=UserWarning, message="Named tensors and all their associated APIs are an experimental feature")
@@ -93,4 +100,4 @@ if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
     
     # Mode production (décommenter pour utiliser)
-    # serve(app, host='0.0.0.0', port=5000)
+    # serve(app, host='0.0.0.0', port=5000) 
