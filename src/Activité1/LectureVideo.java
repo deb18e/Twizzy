@@ -22,10 +22,10 @@ public class LectureVideo {
         // Charger la bibliothèque native d'OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         // Charger la DLL FFmpeg nécessaire pour la lecture vidéo (adaptée pour OpenCV 2.4.9)
-        System.load("C:\\Users\\hp\\Downloads\\opencv\\build\\x64\\vc14\\bin\\opencv_ffmpeg2413_64.dll");
-
+        System.load("C:\\Users\\hp\\Downloads\\open_cv249\\opencv\\build\\x64\\vc12\\bin\\opencv_ffmpeg249_64.dll");
+    
         // Chemin complet vers le fichier vidéo
-        String filePath = "C:\\Users\\hp\\Downloads\\video1.avi";
+        String filePath = "video1.avi";
         if (!Paths.get(filePath).toFile().exists()) {
             System.out.println("File " + filePath + " does not exist!");
             return;
@@ -50,7 +50,7 @@ public class LectureVideo {
                 break;
             }
         }
-
+    
         // Convertir la Mat en BufferedImage et afficher l'image dans une fenêtre
         BufferedImage bufferedImage = matToBufferedImage(frame);
         showWindow(bufferedImage);

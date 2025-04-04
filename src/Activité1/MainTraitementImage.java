@@ -1,6 +1,7 @@
 package Activité1;
 import java.nio.file.Path;
 
+
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +141,7 @@ public class MainTraitementImage {
 	
 	public static void main(String[] args) {
         try {
-            String result = processImage("p10.jpg");
+            String result = processImage("p5.jpg");
             System.out.println("Résultat : " + result);
         } catch (Exception e) {
             e.printStackTrace();

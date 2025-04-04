@@ -243,9 +243,14 @@ public class TraitementImage {
 
 		}
 
-		return goodMatches.size();
+		
+		
+     //   return 1.0 / (1.0 + somme / matchs.rows()); // Score entre 0 et 1
+        return goodMatches.size();
+        }
+    
 
-	}
+
 
 	// Methode qui permet de saturer les couleurs rouges � partir de 3 seuils
 	public static Mat seuillage(Mat input, int seuilRougeOrange, int seuilRougeViolet, int seuilSaturation) {
