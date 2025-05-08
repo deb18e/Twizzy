@@ -1,15 +1,15 @@
 # Classification de Panneaux Routiers avec CNN
 
-Ce projet implémente un modèle de classification de panneaux routiers utilisant une architecture ResNet, avec un backend Flask et un frontend HTML/JS.
+Ce projet implémente un modèle de classification de panneaux routiers utilisant une architecture ResNet.
 
 ## URL du projet déployé
 
 L'application est déployée sur Render :  
-🌐 [https://cnn-2.onrender.com/](https://cnn-2.onrender.com/)
+🌐 [https://cnn-3.onrender.com/](https://cnn-3.onrender.com/)
 
 ## Fonctionnalités
 
-- Classification d'images de panneaux routiers (format PNG)
+- Classification d'images de panneaux routiers
 - Détection des limitations de vitesse
 - Interface simple avec glisser-déposer ou sélection de fichier
 - Exemples intégrés pour tester rapidement
@@ -18,7 +18,7 @@ L'application est déployée sur Render :
 
 ### Backend
 
-- Python 3.9+
+- Python
 - Flask (serveur web)
 - PyTorch (modèle de deep learning)
 - ResNet (architecture CNN)
