@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
+import Activité1.MainTraitementImage;
+
 public class LectureVideo {
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -25,7 +27,7 @@ public class LectureVideo {
         System.load("C:\\Users\\hp\\Downloads\\open_cv249\\opencv\\build\\x64\\vc12\\bin\\opencv_ffmpeg249_64.dll");
     
         // Chemin complet vers le fichier vidéo
-        String filePath = "video1.avi";
+        String filePath = "video2.avi";
         if (!Paths.get(filePath).toFile().exists()) {
             System.out.println("File " + filePath + " does not exist!");
             return;
@@ -38,15 +40,36 @@ public class LectureVideo {
             return;
         }
 
-        // Lire une frame de la vidéo
+   
+     // Lire une frame de la vidéo
         Mat frame = new Mat();
-        while (true) {
-            if (camera.read(frame)) {
-                System.out.println("Frame Obtained");
-                System.out.println("Captured Frame Width " + frame.width() + " Height " + frame.height());
-                // Sauvegarder la frame dans un fichier image
-                Highgui.imwrite("camera.jpg", frame);
-                System.out.println("OK");
+        int frameCount = 0;
+
+        while (camera.read(frame)) {
+            frameCount++;
+
+            // Sauvegarde temporairement la frame comme image
+            String tempImagePath = "frame_temp.jpg";
+            Highgui.imwrite(tempImagePath, frame);
+            
+
+            // Appele le traitement sur cette image
+            try {
+                String panneauDetecte = MainTraitementImage.processImage(tempImagePath);
+                System.out.println("Frame " + frameCount + " : Panneau détecté → " + panneauDetecte);
+            } catch (Exception e) {
+                System.out.println("Erreur lors du traitement de l'image : " + e.getMessage());
+            }
+
+            // Afficher la frame (optionnel)
+            BufferedImage image = matToBufferedImage(frame);
+            showWindow(image);
+
+            // Pause pour visualiser chaque image
+            Thread.sleep(10);  // 10ms entre les frames pour aller trop vite 
+
+            
+            if (frameCount >= 100) {
                 break;
             }
         }
