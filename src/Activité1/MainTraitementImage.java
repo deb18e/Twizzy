@@ -1,4 +1,5 @@
 package Activité1;
+
 import java.nio.file.Path;
 
 
@@ -75,6 +76,8 @@ public class MainTraitementImage {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		//Mat m = Highgui.imread(currentDir + "/res/images/p10.jpg",Highgui.CV_LOAD_IMAGE_COLOR);
 		Mat m = Highgui.imread(args, Highgui.CV_LOAD_IMAGE_COLOR);
+		
+
 		found = new ArrayList();
 		// TraitementImage.afficheImage("Image teste", m);
 		Mat transformee = TraitementImage.transformeBGRversHSV(m);
@@ -142,7 +145,7 @@ public class MainTraitementImage {
 	
 	public static void main(String[] args) {
         try {
-            String result = processImage("p18.png");
+            String result = processImage("p17.jpg");
             System.out.println("Résultat : " + result);
         } catch (Exception e) {
             e.printStackTrace();
