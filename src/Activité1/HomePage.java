@@ -26,11 +26,33 @@ public class HomePage extends JFrame {
             new ImageIcon("interface3.PNG"),
             SwingConstants.CENTER);
         add(illustration, BorderLayout.CENTER);
+        
+        
+        
+   
 
         /* --------- Boutons Images / Vidéo --------- */
         JPanel boutonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 60, 20));
         JButton btnImage = new JButton("Images");
         JButton btnVideo = new JButton("Vidéo");
+        
+        
+
+        JButton btnDeepLearning = new JButton("Deep Learning");
+        btnDeepLearning.addActionListener(e -> {
+            try {
+                Desktop.getDesktop().browse(new java.net.URI("https://cnn-3.onrender.com"));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Impossible d'ouvrir le lien.",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+        boutonsPanel.add(btnDeepLearning);    
         boutonsPanel.add(btnImage);
         boutonsPanel.add(btnVideo);
         add(boutonsPanel, BorderLayout.SOUTH);

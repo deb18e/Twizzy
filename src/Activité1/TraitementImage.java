@@ -2,6 +2,7 @@ package Activité1;
 import java.awt.image.BufferedImage;
 
 
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,7 +187,7 @@ public class TraitementImage {
 		return Math.floor(alpha * 180. / Math.PI + 0.5);
 	}
 
-	// methode � completer
+	
 	public static double Similitude(Mat object, String signfile) {
 
 		// Conversion du signe de reference en niveaux de gris et normalisation

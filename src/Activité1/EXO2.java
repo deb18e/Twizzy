@@ -30,7 +30,7 @@ public class EXO2 {
 	        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 	        // Charger l'image "circles.jpg"
-	        Mat image = LectureImage("circles.jpg");
+	        Mat image = LectureImage("p8.jpg");
 
 	        // Convertir l'image de l'espace colorimétrique BGR à HSV
 	        Mat hsvImage = Mat.zeros(image.size(), image.type());

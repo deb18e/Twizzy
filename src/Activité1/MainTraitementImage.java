@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 
 
+
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class MainTraitementImage {
 		Mat transformee = TraitementImage.transformeBGRversHSV(m);
 		// la methode seuillage est ici extraite de l'archivage jar du meme nom
 		Mat saturee = MaBibliothequeTraitementImage.seuillage(transformee, 6, 170, 110);
+		TraitementImage.afficheImage("Seuillage ", saturee);
 		Mat objetrond = null;
 
 		// Cr�ation d'une liste des contours � partir de l'image satur�e
@@ -101,6 +103,7 @@ public class MainTraitementImage {
 				scores[3] = TraitementImage.Similitude(objetrond,  "ref90.jpg");
 				scores[4] = TraitementImage.Similitude(objetrond,  "ref110.jpg");
 				scores[5] = TraitementImage.Similitude(objetrond,  "refdouble.jpg");
+				
 
 				// recherche de l'index du maximum et affichage du panneau detect�
 				double scoremax = -1;
@@ -132,10 +135,13 @@ public class MainTraitementImage {
 					case 4:
 						// MainMenu.textField.setText("C'est le panneau 110! le nombre de keypoints est :"+nbr);
 						return "ref110.jpg";
+					
 					case 5:
 						// MainMenu.textField.setText("C'est le panneau d'interdiction de passer! le nombre de keypoints est :"+nbr);
 						return "refdouble.jpg";
 					//case 6:System.out.println("Panneau passage de train");break;
+					
+						
 					}}
 
 				}
@@ -145,7 +151,7 @@ public class MainTraitementImage {
 	
 	public static void main(String[] args) {
         try {
-            String result = processImage("p17.jpg");
+            String result = processImage("p8.jpg");
             System.out.println("Résultat : " + result);
         } catch (Exception e) {
             e.printStackTrace();
