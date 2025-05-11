@@ -1,22 +1,22 @@
-# Classification de Panneaux Routiers avec CNN
+# Projet Twizzy
+
+L'objectif de ce projet est de créer une interface pour détecter les panneaux de signalisation avec OpenCV en première partie et avec Deep Learning CNN en deuxième partie.
+
+## Détection des panneaux de signalisation avec OpenCV
+
+
+## Classification de Panneaux Routiers avec CNN
 
 Ce projet implémente un modèle de classification de panneaux routiers utilisant une architecture ResNet.
 
-## URL du projet déployé
+### URL du projet déployé partie Deep Learning
 
 L'application est déployée sur Render :  
 🌐 [https://cnn-3.onrender.com/](https://cnn-3.onrender.com/)
 
-## Fonctionnalités
+### Technologies utilisées
 
-- Classification d'images de panneaux routiers
-- Détection des limitations de vitesse
-- Interface simple avec glisser-déposer ou sélection de fichier
-- Exemples intégrés pour tester rapidement
-
-## Technologies utilisées
-
-### Backend
+#### Backend
 
 - Python
 - Flask (serveur web)
@@ -24,8 +24,12 @@ L'application est déployée sur Render :
 - ResNet (architecture CNN)
 - Waitress (serveur WSGI pour la production)
 
-### Frontend
+#### Frontend
 
 - HTML/CSS
 - JavaScript vanilla
 - API Fetch pour les requêtes
+
+## Installation
+
+-Le projet Twizzy se traduit par une interface qui exige l'installation de OpenCV 2.4.9
