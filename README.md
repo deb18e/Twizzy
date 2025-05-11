@@ -2,7 +2,8 @@
 
 L'objectif de ce projet est de créer une interface pour détecter les panneaux de signalisation avec OpenCV en première partie et avec Deep Learning CNN en deuxième partie.
 
-![V3](./interfaceReadme.jpeg)
+![Interface V3](interfaceReadme.jpeg)
+
 
 ## Détection des panneaux de signalisation avec OpenCV
 
