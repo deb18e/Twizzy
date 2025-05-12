@@ -118,7 +118,7 @@ model.eval()
 model.eval()
 
 # Exemple d'utilisation pour une image de test
-test_image_path = './archive/Test/00014_00022_00022.png'
+test_image_path = './archive/Test/Capture d’écran 2025-05-11 111819.png'
 test_image = Image.open(test_image_path).convert('RGB')
 
 # Appliquer les transformations
