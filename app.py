@@ -229,7 +229,7 @@ def process_video(video_path):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-        time.sleep(1)  
+        time.sleep(0.05)  
 
     cap.release()
 
