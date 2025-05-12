@@ -14,11 +14,7 @@ Il suffit de cloner le projet, switcher sur la branche master, changer le path d
   git switch Master
   ```
 
-## Classification de Panneaux Routiers avec CNN
-L'objectif de ce projet est de créer une interface pour détecter les panneaux de signalisation avec OpenCV en première partie et avec Deep Learning CNN en deuxième partie.
 
-
-## Détection des panneaux de signalisation avec OpenCV
 
 
 ## Classification de Panneaux Routiers avec CNN
