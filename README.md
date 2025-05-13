@@ -42,4 +42,12 @@ L'application est déployée sur Render :
 - JavaScript vanilla
 - API Fetch pour les requêtes
 
+### Installation
+-Il suffit de lancer le site directement
+
+  ```bash
+  git clone git@github.com:deb18e/Twizzy.git
+  git switch Main
+  ```
+
 
