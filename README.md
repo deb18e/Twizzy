@@ -42,7 +42,4 @@ L'application est déployée sur Render :
 - JavaScript vanilla
 - API Fetch pour les requêtes
 
-## Installation
-
--Le projet Twizzy se traduit par une interface qui exige l'installation de OpenCV 2.4.9
 
