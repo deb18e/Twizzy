@@ -51,3 +51,38 @@ L'application est déployée sur Render :
   ```
 
 
+
+## Détection et Suivi d'Objets (Choix 1)
+
+Ce module ajoute la détection et le suivi multi-objets dans des séquences vidéo, en utilisant
+**YOLOv8** (Ultralytics) pour la détection et **ByteTrack** ou **BoT-SORT** pour le suivi persistant.
+
+### Fonctionnalités
+
+- **Détection sur image** : upload d'une image, les objets sont encadrés avec leur classe et leur score de confiance.
+- **Suivi vidéo** : upload d'une vidéo, chaque objet reçoit un identifiant unique (ID) persistant d'une frame à l'autre, et sa trajectoire est dessinée.
+- **Choix du tracker** : ByteTrack (rapide, robuste) ou BoT-SORT (avec ré-identification apparence).
+- Détection sur **80 classes COCO** (personnes, véhicules, animaux, etc.).
+
+### Technologies utilisées
+
+- **YOLOv8-nano** (ultralytics) — détecteur léger et rapide
+- **ByteTrack / BoT-SORT** — algorithmes de suivi multi-objets intégrés dans Ultralytics
+- **OpenCV** — traitement vidéo frame par frame
+- **Flask** — serveur web, streaming MJPEG
+
+### Accès
+
+Une fois le serveur lancé (`python app.py`), la page de détection/suivi est disponible à :
+
+```
+http://localhost:5000/tracker
+```
+
+### Fichiers
+
+| Fichier | Rôle |
+|---|---|
+| `tracker.py` | Module de détection (YOLO) et suivi (ByteTrack/BoT-SORT), générateur de flux vidéo |
+| `templates/tracker.html` | Interface web pour upload image/vidéo et affichage des résultats |
+| `app.py` | Routes Flask : `/tracker`, `/tracker_upload`, `/tracker_feed`, `/tracker_detect_image` |
