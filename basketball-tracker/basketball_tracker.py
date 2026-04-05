@@ -72,7 +72,7 @@ def _dominant_hue(frame: np.ndarray, x1: int, y1: int, x2: int, y2: int) -> floa
     if box_h < 20 or (x2 - x1) < 10:
         return None
 
-    # Zone maillot : du tiers supérieur au deux-tiers
+    # Zone maillot : du quart supérieur aux deux-tiers de la boîte
     roi = frame[y1 + box_h // 4: y1 + 2 * box_h // 3, x1:x2]
     if roi.size == 0:
         return None
