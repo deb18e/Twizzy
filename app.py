@@ -2,13 +2,17 @@ from flask import Flask, jsonify, request, render_template, Response
 from flask_cors import CORS
 from PIL import Image
 import io
+import base64
+import uuid
 import torch
 from torchvision import transforms
 import cv2
 import numpy as np
 import logging
+from werkzeug.utils import secure_filename
 from model import ResNet, BasicBlock
 import os
+import tracker as trk
 
 app = Flask(__name__)
 CORS(app)
@@ -238,6 +242,104 @@ def process_video(video_path):
 def video_feed():
     return Response(process_video(current_video_path),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+# ── Tracker routes ─────────────────────────────────────────────────────────────
+
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
+
+
+def _allowed_video(filename: str) -> bool:
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
+
+
+def _allowed_image(filename: str) -> bool:
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+@app.route('/tracker')
+def tracker_page():
+    return render_template('tracker.html')
+
+
+# Chemin de la vidéo courante pour le tracker (par session-like UUID)
+tracker_video_path = None
+
+
+@app.route('/tracker_upload', methods=['POST'])
+def tracker_upload():
+    """Reçoit une vidéo et la sauvegarde temporairement avec un nom unique."""
+    global tracker_video_path
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'Aucun fichier envoyé'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Nom de fichier manquant'}), 400
+
+    filename = secure_filename(file.filename)
+    if not _allowed_video(filename):
+        return jsonify({'error': 'Format vidéo non supporté'}), 400
+
+    unique_name = f"tracker_{uuid.uuid4().hex}.mp4"
+    save_path = os.path.join('static', unique_name)
+    file.save(save_path)
+
+    # Supprimer l'ancienne vidéo temporaire si elle existe
+    if tracker_video_path and os.path.isfile(tracker_video_path):
+        try:
+            os.remove(tracker_video_path)
+        except OSError:
+            pass
+
+    tracker_video_path = save_path
+
+    return jsonify({'status': 'success'})
+
+
+@app.route('/tracker_feed')
+def tracker_feed():
+    """Flux vidéo MJPEG avec détection et suivi YOLO."""
+    global tracker_video_path
+
+    if not tracker_video_path:
+        return jsonify({'error': 'Aucune vidéo disponible'}), 404
+
+    tracker_name = request.args.get('tracker', 'bytetrack')
+    if tracker_name not in ('bytetrack', 'botsort'):
+        tracker_name = 'bytetrack'
+
+    return Response(
+        trk.generate_tracked_video(tracker_video_path, tracker=tracker_name),
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+
+@app.route('/tracker_detect_image', methods=['POST'])
+def tracker_detect_image():
+    """Détecte les objets dans une image via YOLO et retourne l'image annotée."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'Aucun fichier envoyé'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Nom de fichier manquant'}), 400
+
+    filename = secure_filename(file.filename)
+    if not _allowed_image(filename):
+        return jsonify({'error': 'Format image non supporté'}), 400
+
+    image_bytes = file.read()
+    try:
+        annotated_bytes, detections = trk.detect_image(image_bytes)
+        encoded = base64.b64encode(annotated_bytes).decode('utf-8')
+        return jsonify({'image': encoded, 'detections': detections})
+    except Exception as exc:
+        app.logger.error("Erreur détection image YOLO : %s", exc, exc_info=True)
+        return jsonify({'error': 'Erreur lors de la détection'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

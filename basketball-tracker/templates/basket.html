@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏀 Basketball Player Tracker</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 2rem 1rem;
+        }
+
+        .container { max-width: 960px; margin: 0 auto; }
+
+        /* ── Header ── */
+        header { text-align: center; margin-bottom: 2.5rem; }
+
+        header h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff6a00, #ee0979, #ff6a00);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer { to { background-position: 200% center; } }
+
+        header p { margin-top: 0.6rem; color: #9ca3af; font-size: 1rem; }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 106, 0, 0.15);
+            border: 1px solid rgba(255, 106, 0, 0.4);
+            border-radius: 2rem;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.8rem;
+            color: #ff6a00;
+            margin: 0.2rem;
+            vertical-align: middle;
+        }
+
+        /* ── Tabs ── */
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 0.7rem;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── Card ── */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 1.2rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 { font-size: 1.3rem; margin-bottom: 1.2rem; color: #ff6a00; }
+
+        /* ── Upload zone ── */
+        .upload-zone {
+            border: 2px dashed rgba(255, 106, 0, 0.4);
+            border-radius: 1rem;
+            padding: 2.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .upload-zone:hover {
+            border-color: #ff6a00;
+            background: rgba(255, 106, 0, 0.05);
+        }
+
+        .upload-icon { font-size: 2.8rem; }
+        .upload-zone p { color: #9ca3af; margin-top: 0.5rem; font-size: 0.9rem; }
+        input[type="file"] { display: none; }
+
+        /* ── Options ── */
+        .options-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .options-row label { color: #9ca3af; font-size: 0.9rem; }
+
+        select {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 0.7rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-primary { background: linear-gradient(135deg, #ff6a00, #ee0979); color: #fff; }
+        .btn-danger  { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
+
+        /* ── Media ── */
+        .media-wrapper { margin-top: 1.5rem; text-align: center; }
+
+        #img-result, #video-stream {
+            max-width: 100%;
+            border-radius: 0.8rem;
+            border: 2px solid rgba(255,255,255,0.12);
+            display: none;
+        }
+
+        /* ── Détections ── */
+        #detections-list { margin-top: 1rem; }
+
+        .det-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0.8rem;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.04);
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .det-item .conf { color: #ff6a00; font-weight: 700; }
+
+        /* ── Stats ── */
+        .stats-bar {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat-chip {
+            background: rgba(255, 106, 0, 0.12);
+            border: 1px solid rgba(255, 106, 0, 0.3);
+            border-radius: 2rem;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.85rem;
+            color: #ff6a00;
+        }
+
+        /* ── Team scoreboard ── */
+        .scoreboard {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .team-card {
+            flex: 1;
+            border-radius: 0.8rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .team-card.team1 { background: rgba(255,100,30,0.15); border: 1px solid rgba(255,100,30,0.35); }
+        .team-card.team2 { background: rgba(30,144,255,0.15); border: 1px solid rgba(30,144,255,0.35); }
+
+        .team-card .team-name { font-size: 0.85rem; color: #9ca3af; margin-bottom: 0.4rem; }
+        .team-card .team-count { font-size: 2rem; font-weight: 800; }
+        .team-card.team1 .team-count { color: #ff6428; }
+        .team-card.team2 .team-count { color: #1e90ff; }
+        .team-card .team-label { font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem; }
+
+        /* ── Loader ── */
+        .loader {
+            display: none;
+            width: 38px;
+            height: 38px;
+            margin: 1rem auto;
+            border: 4px solid rgba(255,255,255,0.08);
+            border-top: 4px solid #ff6a00;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Status ── */
+        .status-msg { text-align: center; margin-top: 0.8rem; font-size: 0.9rem; color: #9ca3af; }
+        .status-msg.error { color: #f87171; }
+
+        /* ── Info card ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .info-item {
+            background: rgba(255,255,255,0.04);
+            border-radius: 0.7rem;
+            padding: 1rem;
+        }
+
+        .info-item strong { color: #ff6a00; display: block; margin-bottom: 0.3rem; }
+        .info-item span { color: #9ca3af; font-size: 0.88rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <header>
+        <h1>🏀 Basketball Player Tracker</h1>
+        <p>
+            Détection et suivi de joueurs en temps réel
+            <span class="badge">YOLOv8</span>
+            <span class="badge">ByteTrack</span>
+            <span class="badge">Détection d'équipes</span>
+        </p>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('image', event)">🖼️ Analyse Image</button>
+        <button class="tab-btn" onclick="switchTab('video', event)">📹 Suivi Vidéo</button>
+    </div>
+
+    <!-- ===== Image tab ===== -->
+    <div id="tab-image" class="tab-content active">
+        <div class="card">
+            <h2>Détection de joueurs sur image</h2>
+            <label class="upload-zone" for="img-input" id="img-drop">
+                <div class="upload-icon">🏀</div>
+                <strong>Cliquez ou déposez une image</strong>
+                <p>JPG, PNG, JPEG, WebP — max 16 Mo</p>
+            </label>
+            <input type="file" id="img-input" accept="image/*">
+
+            <div class="loader" id="img-loader"></div>
+            <div class="status-msg" id="img-status"></div>
+
+            <div class="media-wrapper">
+                <img id="img-result" alt="Résultat détection">
+            </div>
+
+            <div id="detections-list"></div>
+        </div>
+    </div>
+
+    <!-- ===== Video tab ===== -->
+    <div id="tab-video" class="tab-content">
+        <div class="card">
+            <h2>Suivi de joueurs sur vidéo</h2>
+
+            <label class="upload-zone" for="vid-input" id="vid-drop">
+                <div class="upload-icon">📹</div>
+                <strong>Cliquez ou déposez une vidéo de basket</strong>
+                <p>MP4, AVI, MOV — max 200 Mo</p>
+            </label>
+            <input type="file" id="vid-input" accept="video/*">
+
+            <div class="options-row">
+                <label for="tracker-select">Algorithme de suivi :</label>
+                <select id="tracker-select">
+                    <option value="bytetrack">ByteTrack</option>
+                    <option value="botsort">BoT-SORT</option>
+                </select>
+                <button class="btn btn-primary" id="start-btn" disabled onclick="startTracking()">
+                    ▶ Lancer le suivi
+                </button>
+                <button class="btn btn-danger" id="stop-btn" style="display:none" onclick="stopTracking()">
+                    ⏹ Arrêter
+                </button>
+            </div>
+
+            <div class="loader" id="vid-loader"></div>
+            <div class="status-msg" id="vid-status"></div>
+
+            <!-- Scoreboard équipes -->
+            <div class="scoreboard" id="scoreboard" style="display:none">
+                <div class="team-card team1">
+                    <div class="team-name">🟠 Équipe 1</div>
+                    <div class="team-count" id="t1-count">—</div>
+                    <div class="team-label">joueurs détectés</div>
+                </div>
+                <div class="team-card team2">
+                    <div class="team-name">🔵 Équipe 2</div>
+                    <div class="team-count" id="t2-count">—</div>
+                    <div class="team-label">joueurs détectés</div>
+                </div>
+            </div>
+
+            <div class="stats-bar" id="tracker-stats"></div>
+
+            <div class="media-wrapper">
+                <img id="video-stream" alt="Flux vidéo annoté">
+            </div>
+        </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="card">
+        <h2>ℹ️ Comment ça fonctionne ?</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <strong>🔍 Détection</strong>
+                <span>YOLOv8-nano COCO filtre la classe « person » pour isoler les joueurs sur le terrain.</span>
+            </div>
+            <div class="info-item">
+                <strong>🔁 Suivi</strong>
+                <span>ByteTrack/BoT-SORT assigne un ID persistant à chaque joueur entre les frames et trace sa trajectoire.</span>
+            </div>
+            <div class="info-item">
+                <strong>🎽 Équipes</strong>
+                <span>Un clustering K-means sur la teinte HSV du maillot tente de regrouper les joueurs en deux équipes.</span>
+            </div>
+            <div class="info-item">
+                <strong>📊 Stats</strong>
+                <span>Comptage des joueurs par équipe affiché en temps réel sur le flux vidéo et dans le scoreboard.</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ── Tab switching ──────────────────────────────────────────────────────────
+    function switchTab(name, event) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // ── Image detection ────────────────────────────────────────────────────────
+    const imgInput  = document.getElementById('img-input');
+    const imgResult = document.getElementById('img-result');
+    const imgLoader = document.getElementById('img-loader');
+    const imgStatus = document.getElementById('img-status');
+    const detList   = document.getElementById('detections-list');
+
+    imgInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        imgLoader.style.display = 'block';
+        imgStatus.textContent   = 'Analyse en cours…';
+        imgStatus.className     = 'status-msg';
+        imgResult.style.display = 'none';
+        detList.innerHTML       = '';
+
+        const fd = new FormData();
+        fd.append('file', file);
+
+        try {
+            const resp = await fetch('/detect_image', { method: 'POST', body: fd });
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) throw new Error(data.error || 'Erreur serveur');
+
+            imgResult.src          = 'data:image/jpeg;base64,' + data.image;
+            imgResult.style.display = 'block';
+
+            const dets = data.detections || [];
+            imgStatus.textContent = `${dets.length} joueur(s) détecté(s)`;
+
+            detList.innerHTML = dets.map((d, i) => `
+                <div class="det-item">
+                    <span>🏀 Joueur #${i + 1}</span>
+                    <span class="conf">${(d.confidence * 100).toFixed(1)}%</span>
+                </div>`).join('');
+
+        } catch (err) {
+            imgStatus.textContent = 'Erreur : ' + err.message;
+            imgStatus.className   = 'status-msg error';
+        } finally {
+            imgLoader.style.display = 'none';
+        }
+    });
+
+    // ── Video tracking ─────────────────────────────────────────────────────────
+    const vidInput    = document.getElementById('vid-input');
+    const startBtn    = document.getElementById('start-btn');
+    const stopBtn     = document.getElementById('stop-btn');
+    const vidLoader   = document.getElementById('vid-loader');
+    const vidStatus   = document.getElementById('vid-status');
+    const videoStream = document.getElementById('video-stream');
+    const statsBar    = document.getElementById('tracker-stats');
+    const scoreboard  = document.getElementById('scoreboard');
+
+    let selectedVideoFile = null;
+
+    vidInput.addEventListener('change', (e) => {
+        selectedVideoFile = e.target.files[0];
+        if (selectedVideoFile) {
+            startBtn.disabled     = false;
+            vidStatus.textContent = `Vidéo prête : ${selectedVideoFile.name}`;
+            vidStatus.className   = 'status-msg';
+        }
+    });
+
+    async function startTracking() {
+        if (!selectedVideoFile) return;
+
+        startBtn.style.display  = 'none';
+        stopBtn.style.display   = 'inline-block';
+        vidLoader.style.display = 'block';
+        vidStatus.textContent   = 'Envoi de la vidéo…';
+        videoStream.style.display = 'none';
+        scoreboard.style.display  = 'none';
+        statsBar.innerHTML        = '';
+
+        const tracker = document.getElementById('tracker-select').value;
+        const fd = new FormData();
+        fd.append('file', selectedVideoFile);
+
+        try {
+            const resp = await fetch('/upload', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (!resp.ok || data.error) throw new Error(data.error || 'Erreur upload');
+
+            vidStatus.textContent   = 'Suivi en cours…';
+            vidLoader.style.display = 'none';
+
+            statsBar.innerHTML = `
+                <span class="stat-chip">🤖 YOLOv8-nano</span>
+                <span class="stat-chip">🔁 ${tracker === 'bytetrack' ? 'ByteTrack' : 'BoT-SORT'}</span>
+                <span class="stat-chip">🎽 Détection d'équipes</span>`;
+
+            scoreboard.style.display = 'flex';
+            document.getElementById('t1-count').textContent = '—';
+            document.getElementById('t2-count').textContent = '—';
+
+            videoStream.src           = `/video_feed?tracker=${tracker}&t=${Date.now()}`;
+            videoStream.style.display = 'block';
+
+            videoStream.onerror = () => {
+                vidStatus.textContent = 'Flux terminé.';
+                resetControls();
+            };
+
+        } catch (err) {
+            vidStatus.textContent   = 'Erreur : ' + err.message;
+            vidStatus.className     = 'status-msg error';
+            vidLoader.style.display = 'none';
+            resetControls();
+        }
+    }
+
+    function stopTracking() {
+        videoStream.src           = '';
+        videoStream.style.display = 'none';
+        vidStatus.textContent     = 'Suivi arrêté.';
+        scoreboard.style.display  = 'none';
+        resetControls();
+    }
+
+    function resetControls() {
+        startBtn.style.display = 'inline-block';
+        stopBtn.style.display  = 'none';
+        vidLoader.style.display = 'none';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détection & Suivi d'Objets</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4CC9F0, #7B2FBE);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            margin-top: 0.6rem;
+            color: #9ca3af;
+            font-size: 1rem;
+        }
+
+        nav.back-link {
+            margin-bottom: 1.5rem;
+        }
+
+        nav.back-link a {
+            color: #4CC9F0;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        nav.back-link a:hover { text-decoration: underline; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.2rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            color: #4CC9F0;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 0.6rem;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4CC9F0, #7B2FBE);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Upload zone */
+        .upload-zone {
+            border: 2px dashed rgba(76, 201, 240, 0.4);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .upload-zone:hover { border-color: #4CC9F0; }
+
+        .upload-zone p { color: #9ca3af; margin-top: 0.5rem; font-size: 0.9rem; }
+
+        .upload-icon { font-size: 2.5rem; }
+
+        input[type="file"] { display: none; }
+
+        /* Options row */
+        .options-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .options-row label { color: #9ca3af; font-size: 0.9rem; }
+
+        select {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 0.7rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CC9F0, #4361ee);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: #fff;
+        }
+
+        /* Media display */
+        .media-wrapper {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        #img-result, #video-stream {
+            max-width: 100%;
+            border-radius: 0.8rem;
+            border: 2px solid rgba(255,255,255,0.12);
+            display: none;
+        }
+
+        /* Detections list */
+        #detections-list {
+            margin-top: 1rem;
+        }
+
+        .det-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0.8rem;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .det-item .conf { color: #4CC9F0; font-weight: 600; }
+
+        /* Stats bar */
+        .stats {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.8rem;
+        }
+
+        .stat-chip {
+            background: rgba(76,201,240,0.12);
+            border: 1px solid rgba(76,201,240,0.3);
+            border-radius: 2rem;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.85rem;
+            color: #4CC9F0;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            width: 36px;
+            height: 36px;
+            margin: 1rem auto;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #4CC9F0;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Status message */
+        .status-msg {
+            text-align: center;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+
+        .status-msg.error { color: #f87171; }
+
+        /* Tracker badge */
+        .tracker-badge {
+            display: inline-block;
+            background: rgba(123,47,190,0.25);
+            border: 1px solid rgba(123,47,190,0.5);
+            border-radius: 2rem;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.78rem;
+            color: #c084fc;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav class="back-link"><a href="/">← Retour à la classification CNN</a></nav>
+
+    <header>
+        <h1>🎯 Détection &amp; Suivi d'Objets</h1>
+        <p>YOLOv8 + ByteTrack — détection multi-objets en temps réel sur images et vidéos</p>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('image', event)">🖼️ Analyse Image</button>
+        <button class="tab-btn" onclick="switchTab('video', event)">📹 Suivi Vidéo</button>
+    </div>
+
+    <!-- ===== Image tab ===== -->
+    <div id="tab-image" class="tab-content active">
+        <div class="card">
+            <h2>Détection sur Image</h2>
+            <label class="upload-zone" for="img-input" id="img-drop-zone">
+                <div class="upload-icon">🖼️</div>
+                <strong>Cliquez ou déposez une image</strong>
+                <p>JPG, PNG, JPEG — max 16 Mo</p>
+            </label>
+            <input type="file" id="img-input" accept="image/*">
+
+            <div class="loader" id="img-loader"></div>
+            <div class="status-msg" id="img-status"></div>
+
+            <div class="media-wrapper">
+                <img id="img-result" alt="Résultat détection">
+            </div>
+
+            <div id="detections-list"></div>
+        </div>
+    </div>
+
+    <!-- ===== Video tab ===== -->
+    <div id="tab-video" class="tab-content">
+        <div class="card">
+            <h2>Suivi Multi-Objets sur Vidéo</h2>
+
+            <label class="upload-zone" for="vid-input" id="vid-drop-zone">
+                <div class="upload-icon">📹</div>
+                <strong>Cliquez ou déposez une vidéo</strong>
+                <p>MP4, AVI, MOV — max 200 Mo</p>
+            </label>
+            <input type="file" id="vid-input" accept="video/*">
+
+            <div class="options-row">
+                <label for="tracker-select">Algorithme de suivi :</label>
+                <select id="tracker-select">
+                    <option value="bytetrack">ByteTrack</option>
+                    <option value="botsort">BoT-SORT</option>
+                </select>
+                <button class="btn btn-primary" id="start-btn" disabled onclick="startTracking()">
+                    ▶ Lancer le suivi
+                </button>
+                <button class="btn btn-danger" id="stop-btn" style="display:none" onclick="stopTracking()">
+                    ⏹ Arrêter
+                </button>
+            </div>
+
+            <div class="loader" id="vid-loader"></div>
+            <div class="status-msg" id="vid-status"></div>
+
+            <div class="media-wrapper">
+                <img id="video-stream" alt="Flux vidéo annoté">
+            </div>
+
+            <div class="stats" id="tracker-stats"></div>
+        </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="card">
+        <h2>ℹ️ À propos</h2>
+        <p style="color:#9ca3af; line-height:1.7; font-size:0.95rem;">
+            Ce module utilise <strong style="color:#e0e0e0">YOLOv8-nano</strong> (Ultralytics) pour la
+            détection d'objets sur les 80 classes COCO (personnes, véhicules, animaux, etc.).<br>
+            Le suivi persistant est assuré par <strong style="color:#e0e0e0">ByteTrack</strong> ou
+            <strong style="color:#e0e0e0">BoT-SORT</strong>, qui associent un identifiant unique à chaque
+            objet entre les frames et tracent sa trajectoire.
+        </p>
+    </div>
+</div>
+
+<script>
+    // ── Tab switching ──────────────────────────────────────────────────────────
+    function switchTab(name, event) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // ── Image detection ────────────────────────────────────────────────────────
+    const imgInput = document.getElementById('img-input');
+    const imgResult = document.getElementById('img-result');
+    const imgLoader = document.getElementById('img-loader');
+    const imgStatus = document.getElementById('img-status');
+    const detList = document.getElementById('detections-list');
+
+    imgInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        imgLoader.style.display = 'block';
+        imgStatus.textContent = 'Analyse en cours…';
+        imgStatus.className = 'status-msg';
+        imgResult.style.display = 'none';
+        detList.innerHTML = '';
+
+        const fd = new FormData();
+        fd.append('file', file);
+
+        try {
+            const resp = await fetch('/tracker_detect_image', { method: 'POST', body: fd });
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) {
+                throw new Error(data.error || 'Erreur serveur');
+            }
+
+            imgResult.src = 'data:image/jpeg;base64,' + data.image;
+            imgResult.style.display = 'block';
+
+            const dets = data.detections || [];
+            imgStatus.textContent = `${dets.length} objet(s) détecté(s)`;
+
+            detList.innerHTML = dets.map(d => `
+                <div class="det-item">
+                    <span>${d.label}</span>
+                    <span class="conf">${(d.confidence * 100).toFixed(1)}%</span>
+                </div>`).join('');
+
+        } catch (err) {
+            imgStatus.textContent = 'Erreur : ' + err.message;
+            imgStatus.className = 'status-msg error';
+        } finally {
+            imgLoader.style.display = 'none';
+        }
+    });
+
+    // ── Video tracking ─────────────────────────────────────────────────────────
+    const vidInput = document.getElementById('vid-input');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const vidLoader = document.getElementById('vid-loader');
+    const vidStatus = document.getElementById('vid-status');
+    const videoStream = document.getElementById('video-stream');
+    const trackerStats = document.getElementById('tracker-stats');
+
+    let selectedVideoFile = null;
+
+    vidInput.addEventListener('change', (e) => {
+        selectedVideoFile = e.target.files[0];
+        if (selectedVideoFile) {
+            startBtn.disabled = false;
+            vidStatus.textContent = `Vidéo prête : ${selectedVideoFile.name}`;
+            vidStatus.className = 'status-msg';
+        }
+    });
+
+    async function startTracking() {
+        if (!selectedVideoFile) return;
+
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        vidLoader.style.display = 'block';
+        vidStatus.textContent = 'Envoi de la vidéo…';
+        videoStream.style.display = 'none';
+        trackerStats.innerHTML = '';
+
+        const tracker = document.getElementById('tracker-select').value;
+        const fd = new FormData();
+        fd.append('file', selectedVideoFile);
+        fd.append('tracker', tracker);
+
+        try {
+            const resp = await fetch('/tracker_upload', { method: 'POST', body: fd });
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) throw new Error(data.error || 'Erreur upload');
+
+            vidStatus.textContent = 'Suivi en cours…';
+            vidLoader.style.display = 'none';
+
+            const trackerBadge = tracker === 'bytetrack' ? 'ByteTrack' : 'BoT-SORT';
+            trackerStats.innerHTML = `
+                <span class="stat-chip">🤖 YOLOv8-nano</span>
+                <span class="stat-chip">🔁 ${trackerBadge}</span>
+                <span class="stat-chip">📦 COCO 80 classes</span>`;
+
+            videoStream.src = `/tracker_feed?tracker=${tracker}&t=${Date.now()}`;
+            videoStream.style.display = 'block';
+
+            videoStream.onerror = () => {
+                vidStatus.textContent = 'Flux terminé.';
+                resetControls();
+            };
+
+        } catch (err) {
+            vidStatus.textContent = 'Erreur : ' + err.message;
+            vidStatus.className = 'status-msg error';
+            vidLoader.style.display = 'none';
+            resetControls();
+        }
+    }
+
+    function stopTracking() {
+        videoStream.src = '';
+        videoStream.style.display = 'none';
+        vidStatus.textContent = 'Suivi arrêté.';
+        resetControls();
+    }
+
+    function resetControls() {
+        startBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'none';
+        vidLoader.style.display = 'none';
+    }
+</script>
+</body>
+</html>
